@@ -31,7 +31,7 @@ open https://magento.test
 bin/mysqldump > ~/Sites/existing/magento.sql
 
 # Download the Docker Compose template:
-curl -s https://raw.githubusercontent.com/atfjason/magento2-docker/lib/installscript | bash
+curl -s https://raw.githubusercontent.com/atfjason/magento2-docker/master/lib/installscript | bash
 
 # Import existing database:
 bin/mysql < ../existing/magento.sql
