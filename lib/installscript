@@ -1,0 +1,17 @@
+#!/bin/bash
+PROJECT=$1
+BITBUCKET_USER=$2
+
+mkdir -p ~/sites/$PROJECT
+cd ~/sites/$PROJECT
+cp -R ../magento2-docker/compose/* ./
+cp -R ../magento2-docker/compose/.vscode ./
+
+sed -i -e "s/\(WEB_ALIAS_DOMAIN=\).*/\1$PROJECT.test/" docker-compose.yml
+sed -i -e "s/\(MYSQL_DATABASE=\).*/\1$PROJECT/" env/db.env
+git clone https://$BITBUCKET_USER@bitbucket.org/abovethefray/$PROJECT.git
+mv $PROJECT src/
+
+composer install --working-dir=./src/
+# Ensure these are created so Docker doesn't create them as root
+mkdir -p ~/.composer ~/.ssh
