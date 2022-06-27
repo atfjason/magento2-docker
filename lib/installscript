@@ -1,17 +1,64 @@
 #!/bin/bash
-PROJECT=$1
-BITBUCKET_USER=$2
 
-mkdir -p ~/sites/$PROJECT
-cd ~/sites/$PROJECT
-cp -R ../magento2-docker/compose/* ./
-cp -R ../magento2-docker/compose/.vscode ./
+################################################################################
+# Help                                                                         #
+################################################################################
+Help()
+{
+   # Display Help
+   echo
+   echo "Syntax: installscript {project_name} {bitbucket_user}"
+   echo
+}
 
-sed -i -e "s/\(WEB_ALIAS_DOMAIN=\).*/\1$PROJECT.test/" docker-compose.yml
-sed -i -e "s/\(MYSQL_DATABASE=\).*/\1$PROJECT/" env/db.env
-git clone https://$BITBUCKET_USER@bitbucket.org/abovethefray/$PROJECT.git
-mv $PROJECT src/
+############################################################
+############################################################
+# Main program                                             #
+############################################################
+############################################################
+############################################################
+# Process the input options. Add options as needed.        #
+############################################################
+# Get the options
+while getopts ":h" option; do
+   case $option in
+      h) # display Help
+         Help
+         exit;;
+   esac
+done
 
-composer install --working-dir=./src/
-# Ensure these are created so Docker doesn't create them as root
-mkdir -p ~/.composer ~/.ssh
+if [ "$#" -ne 2 ]; then
+  Help
+else
+  PROJECT=$1
+  BITBUCKET_USER=$2
+
+  echo "Creating project directory in" ~/sites/$PROJECT "..."
+  echo
+  mkdir -p ~/sites/$PROJECT
+
+  echo "Moving to project directory in" ~/sites/$PROJECT "..."
+  echo
+  cd ~/sites/$PROJECT
+  cp -R ../magento2-docker/compose/* ./
+  cp -R ../magento2-docker/compose/.vscode ./
+
+  echo "Replacing domain name for WEB_ALIAS_DOMAIN..."
+  echo
+  sed -i -e "s/\(WEB_ALIAS_DOMAIN=\).*/\1$PROJECT.test/" docker-compose.yml
+
+  echo "Replacing db name in MYSQL_DATABASE..."
+  echo
+  sed -i -e "s/\(MYSQL_DATABASE=\).*/\1$PROJECT/" env/db.env
+  echo "Git cloning from bitbucket repo..."
+  echo
+  git clone https://$BITBUCKET_USER@bitbucket.org/abovethefray/$PROJECT.git
+  mv $PROJECT src/
+
+  echo "Composer installing...."
+  echo
+  composer install --working-dir=./src/
+  # Ensure these are created so Docker doesn't create them as root
+  mkdir -p ~/.composer ~/.ssh
+fi
